@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 public class PaddleController : MonoBehaviour
@@ -8,11 +9,17 @@ public class PaddleController : MonoBehaviour
     public KeyCode upKey;
     public KeyCode downKey;
 
+    private float boundary = 3.4f;
+    public Vector2 DefaultScale;
     private Rigidbody2D rig;
+
+    public float timerPU;
 
     private void Start()
     {
         rig = GetComponent<Rigidbody2D>();
+        rig.transform.localScale = DefaultScale;
+        timerPU = 0f;
     }
 
     //private void Update()
@@ -41,13 +48,18 @@ public class PaddleController : MonoBehaviour
     private void Update()
     {
         MoveObject(GetInput());
+        timerPU -= Time.deltaTime;
+        if (timerPU <= 0)
+        {
+            resetPaddle();
+        }
     }
 
     private Vector2 GetInput()
     {
         if (Input.GetKey(upKey))
         {
-            if (gameObject.transform.position.y < 3.4f)
+            if (gameObject.transform.position.y < boundary)
             {
                 Debug.Log("Kecepatan Paddle: " + speed);
                 return Vector2.up * speed;
@@ -55,7 +67,7 @@ public class PaddleController : MonoBehaviour
         }
         else if (Input.GetKey(downKey))
         {
-            if (gameObject.transform.position.y > -3.4f)
+            if (gameObject.transform.position.y > -boundary)
             {
                 Debug.Log("Kecepatan Paddle: " + speed);
                 return Vector2.down * speed;
@@ -69,5 +81,25 @@ public class PaddleController : MonoBehaviour
     {
         //transform.Translate(movement * Time.deltaTime);
         rig.velocity = movement;
+    }
+
+    public void resetPaddle()
+    {
+        rig.transform.localScale = DefaultScale;
+        boundary = 3.4f;
+        speed = 10;
+    }
+
+    public void ActivatePUPaddlePanjang(float PowerUpScale)
+    {
+        timerPU = 5f;
+        rig.transform.localScale = new Vector2(DefaultScale.x, DefaultScale.y * PowerUpScale);
+        boundary /= 1.5f;
+    }
+
+    public void ActivatePUPaddleSpeedUp(int PUSpeedPaddle)
+    {
+        timerPU = 5f;
+        speed *= PUSpeedPaddle;
     }
 }
